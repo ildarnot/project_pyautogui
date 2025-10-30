@@ -1,5 +1,6 @@
 import time
 import pyautogui
+# import pyscreeze
 
 pyautogui.PAUSE = 2
 pyautogui.FAILSAFE=True
@@ -8,11 +9,13 @@ pyautogui.FAILSAFE=True
 pyautogui.click(3709, 79)
 
 # Нажатие на кнопку Расчёт шестерни
-pyautogui.PAUSE = 6
-pyautogui.click(1908, 1000)
+pyautogui.PAUSE = 5
+# pyautogui.click(1908, 1000)
+cords=pyautogui.locateCenterOnScreen("window2.png", confidence=0.7)
+pyautogui.click(cords)
 
 # Нажатие на кнопку произвести расчёт
-pyautogui.PAUSE = 1
+pyautogui.PAUSE = 0.1
 pyautogui.click(2471, 1556)
 
 # Нажатие на модуль и вписывание другого значения
@@ -21,6 +24,9 @@ pyautogui.click(1432, 447, 3, 0.1)
 # pyautogui.hotkey('ctrl', 'a')
 # pyautogui.press('backspace'*5)
 pyautogui.typewrite("7")
+
+pyautogui.click(1435, 503, 3, 0.1)
+pyautogui.typewrite("48")
 
 # Нажатие на кнопку произвести расчёт
 # pyautogui.PAUSE = 1
