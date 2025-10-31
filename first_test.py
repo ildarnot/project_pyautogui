@@ -147,7 +147,7 @@ x, y=pyautogui.locateCenterOnScreen("file_name.png", confidence=0.7)
 pyautogui.click(x, y)
 # Значение названия теста
 test1 = f'1_row_1262G3_Gear_1_{custom_format_datetime}'
-pyautogui.typewrite(str(test1))
+pyautogui.typewrite((test1))
 
 # Нажатие на кнопку сохранить
 save=pyautogui.locateCenterOnScreen("save_button.png", confidence=0.7)

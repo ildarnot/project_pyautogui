@@ -1,3 +1,4 @@
 pyautogui
 opencv-python-headless
 openpyxl
+pdfplumber
