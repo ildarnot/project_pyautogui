@@ -1,12 +1,18 @@
 import time
 import pyautogui
 import openpyxl
+from datetime import datetime
 # import pyscreeze
 
 # Открываем книгу Excel
 wb = openpyxl.load_workbook('input_data.xlsx')
 sheet = wb.active  # Или укажите название листа, если нужно
 
+# Задаём текущее время
+current_datetime = datetime.now()
+custom_format_datetime = current_datetime.strftime("%d.%m.%Y_%H.%M")
+
+# Описываем паузы между кажддым действием в 0,1 сек
 pyautogui.PAUSE = 0.1
 pyautogui.FAILSAFE=True
 
@@ -24,8 +30,8 @@ pyautogui.click(window1)
 # Ожидание пока не отобразится всё на экране
 time.sleep(0.5)
 
-# Нажатие на кнопку произвести расчёт
-pyautogui.click(2471, 1556)
+# # Нажатие на кнопку произвести расчёт
+# pyautogui.click(2471, 1556)
 
 # Очистка графиков
 clear=pyautogui.locateCenterOnScreen("clear_button.png", confidence=0.7)
@@ -118,4 +124,31 @@ pyautogui.typewrite(str(value_from_excel))
 calc=pyautogui.locateCenterOnScreen("calc_button.png", confidence=0.7)
 pyautogui.click(calc)
 
-# Построение графика с помощью 
+# Ожидание пока не отобразится всё на экране
+time.sleep(0.5)
+
+# Нажатие на кнопку сохранить в эксель
+excel_exp=pyautogui.locateCenterOnScreen("excel_exp_button.png", confidence=0.8)
+pyautogui.click(excel_exp)
+
+# Ожидание пока не отобразится всё на экране
+time.sleep(0.5)
+
+# Нажатие на кнопку сохранить тестовая папка
+x, y=pyautogui.locateCenterOnScreen("tests_folder.png", confidence=0.7)
+pyautogui.click(x, y, 2, 0.1)
+
+# Нажатие на кнопку сохранить результаты из таблицы
+x, y=pyautogui.locateCenterOnScreen("table_results_folder.png", confidence=0.7)
+pyautogui.click(x, y, 2, 0.1)
+
+# Нажатие на поле Имя файла
+x, y=pyautogui.locateCenterOnScreen("file_name.png", confidence=0.7)
+pyautogui.click(x, y)
+# Значение названия теста
+test1 = f'1_row_1262G3_Gear_1_{custom_format_datetime}'
+pyautogui.typewrite(str(test1))
+
+# Нажатие на кнопку сохранить
+save=pyautogui.locateCenterOnScreen("save_button.png", confidence=0.7)
+pyautogui.click(save)
