@@ -1,36 +1,181 @@
 import pdfplumber
+import re
+import csv
+import os
+from datetime import datetime
 
-def find_lines_with_word(pdf_path, word):
-    lines = []
-    with pdfplumber.open(pdf_path) as pdf:
-        for page_num, page in enumerate(pdf.pages):
-            # Получаем текст страницы
-            text = page.extract_text()
-            if text:
-                # Разбиваем текст на строки
-                for line in text.split('\n'):
-                    # Проверяем, присутствует ли искомое слово в строке
-                    if word in line:
-                        lines.append((page_num + 1, line.strip()))
-    return lines
-
-# Пример использования
 pdf_file = '1_row_1262G3.pdf'
 
-word_to_find = '[mn]'
-lines_found = find_lines_with_word(pdf_file, word_to_find)
+# Список слов для поиска
+words_to_find = [
+'[mn]', 
+'[z]', 
+'Направление наклона', 
+'[β]', 
+'Данные для финишной обработки [x]', 
+'[b]', 
+'[αn]', 
+'Высота головки зуба, исходный контур [haP*]',
+'Высота ножки зуба исходного контура [hfP*]',
+'Радиус ножки зуба исходного контура [ρfP*]',
+'[pr0]',
+'Угол профиля протуберанца (°) [αprP]',
+'[hprP*]',
+'[d]',
+'[αt]',
+'[db]',
+'[da]',
+'[df]',
+'Диаметр окружности нижних активных точек профиля (мм)',
+'[βb]',
+'[k]',
+'[Wk.e/i]',
+'[ha]',
+'[sc.e/i]',
+'[san]',
+'[DMeff]',
+'[MdK]'
+]
 
-word_to_find2 = '[z]'
-lines_found2 = find_lines_with_word(pdf_file, word_to_find2)
+# Список слов, которые требуются для ввода в программу
+words_to_find2 = [
+'[mn]', 
+'[z]', 
+'Направление наклона', 
+'[β]', 
+'Данные для финишной обработки [x]', 
+'[b]', 
+'[αn]', 
+'Высота головки зуба, исходный контур [haP*]',
+'Высота ножки зуба исходного контура [hfP*]',
+'Радиус ножки зуба исходного контура [ρfP*]',
+'[hprP*]',
+'Угол профиля протуберанца (°) [αprP]'
+]
 
-word_to_find3 = 'Направление наклона'
-lines_found3 = find_lines_with_word(pdf_file, word_to_find3)
+def find_all_words_in_pdf(pdf_path, words_list):
+    results = {word: [] for word in words_list}
+    with pdfplumber.open(pdf_path) as pdf:
+        for page_num, page in enumerate(pdf.pages):
+            text = page.extract_text()
+            if text:
+                for line in text.split('\n'):
+                    for word in words_list:
+                        if word in line:
+                            results[word].append((page_num + 1, line.strip()))
+    return results
 
-for page_number, line in lines_found:
-    print(f"Слово '{word_to_find}' найдено на странице {page_number}: {line}")
+# def find_all_words_in_pdf2(pdf_path, words_list):
+#     results = {word: [] for word in words_list}
+#     with pdfplumber.open(pdf_path) as pdf:
+#         for page_num, page in enumerate(pdf.pages):
+#             text = page.extract_text()
+#             if text:
+#                 for line in text.split('\n'):
+#                     for word in words_list:
+#                         if word in line:
+#                             results[word].append((line.strip()))
+#     return results
 
-for page_number, line in lines_found2:
-    print(f"Слово '{word_to_find2}' найдено на странице {page_number}: {line}")
 
-for page_number, line in lines_found3:
-    print(f"Слово '{word_to_find3}' найдено на странице {page_number}: {line}")
+
+# Выполняем поиск всех слов одновременно
+results = find_all_words_in_pdf(pdf_file, words_to_find)
+
+# Вывод результатов
+for word, lines in results.items():
+    for page_number, line in lines:
+        print(f"'{word}' на стр {page_number}: {line}")
+
+print('_______Список слов, которые требуются для ввода в программу_______')
+
+# Выполняем поиск всех слов одновременно
+results2 = find_all_words_in_pdf(pdf_file, words_to_find2)
+
+# Вывод результатов
+for word, lines in results2.items():
+    for page_number, line in lines:
+        print(f"{line}")
+
+
+# print('_______Список выходных данных_______')
+# results3 = find_all_words_in_pdf2(pdf_file, words_to_find2)
+# print (results3)
+
+
+# Список слов, которые являются выводом из программы
+# words_to_find3 = [
+# '[pr0]',
+# '[d]',
+# '[αt]',
+# '[db]',
+# '[da]',
+# '[df]',
+# 'Диаметр окружности нижних активных точек профиля (мм)',
+# '[βb]',
+# '[k]',
+# '[Wk.e/i]',
+# '[ha]',
+# '[sc.e/i]',
+# '[san]',
+# '[DMeff]',
+# '[MdK]'
+# ]
+
+
+# Перевод данных в csv
+def extract_key_and_values(line):
+    # Находим часть до и включая ']'
+    key_match = re.search(r'.*?\]', line)
+    if not key_match:
+        return None, None, None
+    key = key_match.group(0)
+    
+    # Ищем все числа (целые и дробные, с точкой)
+    numbers = re.findall(r'-?\d+\.?\d*', line)
+    # Оставляем только те, что идут после ключа
+    numbers_after_key = []
+    key_end_pos = key_match.end()
+    for num_str in numbers:
+        num_start = line.find(num_str, key_end_pos)
+        if num_start != -1:
+            numbers_after_key.append(num_str)
+    
+    gear1 = numbers_after_key[0] if len(numbers_after_key) >= 1 else ''
+    gear2 = numbers_after_key[1] if len(numbers_after_key) >= 2 else ''
+    
+    return key, gear1, gear2
+
+def save_to_csv(results, output_csv):
+    with open(output_csv, 'w', newline='', encoding='utf-8-sig') as csvfile:
+        writer = csv.writer(csvfile, delimiter=';')
+        writer.writerow(['Строка и параметр', 'Колесо 1', 'Колесо 2'])
+        # 2. Метка "Вводные данные"
+        writer.writerow(['---', 'Данные из отчётов KISSoft', '---'])
+        writer.writerow(['Вводные данные', '', ''])
+        
+        for word, lines in results.items():
+            for page_number, line in lines:
+                key, gear1, gear2 = extract_key_and_values(line)
+                if key is not None:
+                    # Форматируем числа: заключаем в кавычки и добавляем знак =
+                    gear1_formatted = f'="{gear1}"' if gear1 else ''
+                    gear2_formatted = f'="{gear2}"' if gear2 else ''
+                    writer.writerow([key, gear1_formatted, gear2_formatted])
+
+        # 4. Метка "Выходные данные"
+        writer.writerow(['Выходные данные', '', ''])
+
+# Сохраняем в CSV
+
+# 1. Получаем имя файла без расширения
+pdf_filename_without_ext = os.path.splitext(os.path.basename(pdf_file))[0]
+
+# 2. Получаем текущую дату и время в формате ГГГГММДД_ЧЧММСС
+timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M')
+
+# 3. Формируем итоговое имя CSV-файла
+csv_filename = f'{pdf_filename_without_ext}_{timestamp}.csv'
+
+# 4. Сохраняем в CSV с новым именем
+save_to_csv(results2, csv_filename)

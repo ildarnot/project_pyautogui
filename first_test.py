@@ -5,12 +5,16 @@ from datetime import datetime
 # import pyscreeze
 
 # Открываем книгу Excel
-wb = openpyxl.load_workbook('input_data.xlsx')
+wb = openpyxl.load_workbook('updated_input_data 31.10.2025.xlsx')
 sheet = wb.active  # Или укажите название листа, если нужно
 
 # Задаём текущее время
 current_datetime = datetime.now()
 custom_format_datetime = current_datetime.strftime("%d.%m.%Y_%H.%M")
+
+# Находим значения по кодовым словам
+
+
 
 # Описываем паузы между кажддым действием в 0,1 сек
 pyautogui.PAUSE = 0.1
@@ -41,13 +45,13 @@ pyautogui.click(clear)
 x, y = pyautogui.locateCenterOnScreen("module_button.png", confidence=0.7)
 pyautogui.click(x+150, y, 3, 0.1)
 # Читаем значение из ячейки B3
-value_from_excel = sheet['B3'].value
+value_from_excel = sheet['B1'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Количество зубьев
 x, y = pyautogui.locateCenterOnScreen("teeth_number_button.png", confidence=0.7)
 pyautogui.click(x+150, y, 3, 0.1)
-value_from_excel = sheet['B4'].value
+value_from_excel = sheet['B2'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Выбор направления
@@ -60,19 +64,19 @@ pyautogui.click(x, y)
 # Выбор угла бэта
 x, y = pyautogui.locateCenterOnScreen("degree_betta_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B6'].value
+value_from_excel = sheet['B4'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Выбор смещения X
 x, y = pyautogui.locateCenterOnScreen("X_button.png", confidence=0.7)
 pyautogui.click(x+100, y-25, 3, 0.1)
-value_from_excel = sheet['B8'].value
+value_from_excel = sheet['B5'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Поиск изображения и левой верхней точки "Ширина венца"
 x, y = pyautogui.locateCenterOnScreen("window2.png", confidence=0.7)
 pyautogui.click(x+150, y, 3, 0.1)
-value_from_excel = sheet['B10'].value
+value_from_excel = sheet['B6'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Выбор Профиля рейки
@@ -82,25 +86,25 @@ pyautogui.click(x, y)
 # Выбор угла альфа
 x, y = pyautogui.locateCenterOnScreen("degree_alfa_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B12'].value
+value_from_excel = sheet['B7'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Выбор ha коэффициента высоты головки зуба
 x, y = pyautogui.locateCenterOnScreen("ha_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B13'].value
+value_from_excel = sheet['B8'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Выбор hf коэффициента высоты ножки зуба
 x, y = pyautogui.locateCenterOnScreen("hf_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B14'].value
+value_from_excel = sheet['B9'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Выбор r коэффициента радиуса переходной кривой
 x, y = pyautogui.locateCenterOnScreen("r_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B15'].value
+value_from_excel = sheet['B10'].value
 pyautogui.typewrite(str(value_from_excel))
 
 
@@ -111,13 +115,13 @@ pyautogui.click(x+110, y)
 # Выбор hpr
 x, y = pyautogui.locateCenterOnScreen("hpr_button.png", confidence=0.8)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B16'].value
+value_from_excel = sheet['B11'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Выбор alfa_pr
 x, y = pyautogui.locateCenterOnScreen("degree_alfa_pr_button.png", confidence=0.8)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B17'].value
+value_from_excel = sheet['B12'].value
 pyautogui.typewrite(str(value_from_excel))
 
 # Нажатие на кнопку произвести расчёт
