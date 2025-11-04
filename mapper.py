@@ -1,6 +1,7 @@
 import csv
 import os
 import chardet
+from datetime import datetime
 
 # Явное сопоставление ключей: ключ_из_PDF → ключ_из_TXT
 MAPPING = {
@@ -89,10 +90,13 @@ def merge_data(pdf_csv, txt_csv, output_csv):
 #     merge_data(PDF_CSV, TXT_CSV, OUTPUT_CSV)
 #     print(f"Итоговый файл создан: {OUTPUT_CSV}")
 if __name__ == '__main__':
+
+    # 2. Получаем текущую дату и время в формате ГГГГММДД_ЧЧММСС
+    timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M')
     # Имена файлов (настройте под свои)
-    PDF_CSV = '1_row_1262G3_2025.11.04_13.33.csv'  # Выход pdf_to_csv
-    TXT_CSV = '1_row_1262G3.csv'                   # Выход txt_to_csv
-    OUTPUT_CSV = 'merged_output3.csv'
+    PDF_CSV = '5 ряд_1262G3_2025.11.04_15.26.csv'  # Выход pdf_to_csv
+    TXT_CSV = '5_row_1262_04.11.2025_15.45.csv'                   # Выход txt_to_csv
+    OUTPUT_CSV = f'5_row_merged_{timestamp}.csv'
 
     merge_data(PDF_CSV, TXT_CSV, OUTPUT_CSV)
     print(f"Итоговый файл создан: {OUTPUT_CSV}")

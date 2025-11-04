@@ -4,7 +4,7 @@ import csv
 import os
 from datetime import datetime
 
-pdf_file = '1_row_1262G3.pdf'
+pdf_file = 'ДМ_1262_G3.pdf'
 
 # # Список слов для поиска
 # words_to_find = [

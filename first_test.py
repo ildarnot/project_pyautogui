@@ -2,6 +2,7 @@ import time
 import pyautogui
 import openpyxl
 from datetime import datetime
+import os
 import csv
 # import pyscreeze
 
@@ -12,7 +13,9 @@ import csv
 # Задаём текущее время
 current_datetime = datetime.now()
 custom_format_datetime = current_datetime.strftime("%d.%m.%Y_%H.%M")
-csv_file_path = '1_row_1262G3_2025.11.04_13.23.csv'
+csv_file_path = '5 ряд_1262G3_2025.11.04_15.26.csv'
+# Базовое имя файла без пути и расширения
+base_filename = os.path.splitext(os.path.basename(csv_file_path))[0]
 
 
 # Функция для поиска ячеек с ключевым значением и внос их в программу
@@ -196,9 +199,13 @@ pyautogui.click(calc)
 # Ожидание пока не отобразится всё на экране
 time.sleep(0.5)
 
+# # Нажатие на кнопку сохранить в эксель
+# excel_exp=pyautogui.locateCenterOnScreen("excel_exp_button.png", confidence=0.8)
+# pyautogui.click(excel_exp)
+
 # Нажатие на кнопку сохранить в эксель
-excel_exp=pyautogui.locateCenterOnScreen("excel_exp_button.png", confidence=0.8)
-pyautogui.click(excel_exp)
+txt_exp=pyautogui.locateCenterOnScreen("txt_exp_button.png", confidence=0.8)
+pyautogui.click(txt_exp)
 
 # Ожидание пока не отобразится всё на экране
 time.sleep(0.5)
@@ -215,7 +222,7 @@ pyautogui.click(x, y, 2, 0.1)
 x, y=pyautogui.locateCenterOnScreen("file_name.png", confidence=0.7)
 pyautogui.click(x, y)
 # Значение названия теста
-test1 = f'1_row_1262G3_Gear_1_{custom_format_datetime}'
+test1 = f'5_row_1262_{custom_format_datetime}'
 pyautogui.typewrite((test1))
 
 # Нажатие на кнопку сохранить

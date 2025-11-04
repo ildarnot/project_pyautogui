@@ -2,9 +2,11 @@
 
 import re
 import csv
+import os
 
-input_filename = '1_row_1262G3_2025.11.04_13.35.txt'
-output_filename = '1_row_1262G3.csv'
+input_filename = '5_row_1262_04.11.2025_15.45.txt'
+# Удаляем расширение и добавляем .csv
+output_filename = os.path.splitext(input_filename)[0] + '.csv'
 
 def parse_line(line):
     line = line.strip()
