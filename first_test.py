@@ -5,14 +5,14 @@ from datetime import datetime
 import csv
 # import pyscreeze
 
-# Открываем книгу Excel
-wb = openpyxl.load_workbook('updated_input_data 31.10.2025.xlsx')
-sheet = wb.active  # Или укажите название листа, если нужно
+# # Открываем книгу Excel
+# wb = openpyxl.load_workbook('updated_input_data 31.10.2025.xlsx')
+# sheet = wb.active  # Или укажите название листа, если нужно
 
 # Задаём текущее время
 current_datetime = datetime.now()
 custom_format_datetime = current_datetime.strftime("%d.%m.%Y_%H.%M")
-csv_file_path = '1_row_1262G3_2025.11.04_10.34.csv'
+csv_file_path = '1_row_1262G3_2025.11.04_13.23.csv'
 
 
 # Функция для поиска ячеек с ключевым значением и внос их в программу

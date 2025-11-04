@@ -1,0 +1,212 @@
+# Выгрузка данных из txt
+
+import re
+import csv
+
+def parse_line(line):
+    line = line.strip()
+    if not line:
+        return None, None
+
+    # Улучшенный шаблон для поиска чисел (исключает даты)
+    match = re.search(r'-?(?:\d{1,2}(?![.\d])|\d+)(?:[,.]\d+)?(?![.\d])', line)
+    if not match:
+        return line, None
+
+    num_start = match.start()
+    keyword = line[:num_start].strip()
+    number_str = match.group()
+
+    # Заменяем запятую на точку для float
+    number_str = number_str.replace(',', '.')
+
+    try:
+        result = float(number_str)
+    except ValueError:
+        result = None
+
+    return keyword, result
+
+def main():
+    input_filename = '1_row_1262G3_2025.11.04_13.35.txt'
+    output_filename = '1_row_1262G3.csv'
+
+    try:
+        with open(input_filename, 'r', encoding='utf-8-sig') as infile, \
+             open(output_filename, 'w', newline='', encoding='utf-8-sig') as outfile:
+
+            writer = csv.writer(outfile, delimiter=';')
+            writer.writerow(['Keyword', 'Value'])
+
+            for line_num, line in enumerate(infile, 1):
+                keyword, result = parse_line(line)
+
+                if keyword is not None:
+                    if result is not None:
+                        # Формируем строку с явным указанием формата числа
+                        value_str = f'{result:.3f}'  # 3 знака после запятой
+                    else:
+                        value_str = ''
+
+                    writer.writerow([keyword, value_str])
+
+                    print(f'Строка {line_num}:')
+                    print(f'  Ключевое слово: "{keyword}"')
+                    if result is not None:
+                        print(f'  Результат (число): {result}')
+                    else:
+                        print(f'  Результат: не найдено числовое значение')
+                    print()
+
+        print(f'Данные успешно записаны в файл "{output_filename}".')
+
+    except FileNotFoundError:
+        print(f'Ошибка: файл "{input_filename}" не найден.')
+    except Exception as e:
+        print(f'Произошла ошибка: {e}')
+
+if __name__ == '__main__':
+    main()
+
+
+
+
+
+
+
+# import pdfplumber
+# import re
+# import csv
+# import os
+# from datetime import datetime
+
+# pdf_file = '1_row_1262G3.pdf'
+
+
+# # Список слов, которые требуются для ввода в программу
+# words_to_find2 = [
+# '[mn]', 
+# '[z]', 
+# 'Направление наклона', 
+# '[β]', 
+# 'Данные для финишной обработки [x]', 
+# '[b]', 
+# '[αn]', 
+# 'Высота головки зуба, исходный контур [haP*]',
+# 'Высота ножки зуба исходного контура [hfP*]',
+# 'Радиус ножки зуба исходного контура [ρfP*]',
+# '[hprP*]',
+# 'Угол профиля протуберанца (°) [αprP]'
+# ]
+
+# # Список слов, которые являются выводом из программы
+# words_to_find3 = [
+# '[pr0]',
+# '[d]',
+# '[αt]',
+# '[db]',
+# '[da]',
+# '[df]',
+# 'Диаметр окружности нижних активных точек профиля (мм)',
+# '[βb]',
+# '[k]',
+# '[Wk.e/i]',
+# '[ha]',
+# '[sc.e/i]',
+# '[san]',
+# '[DMeff]',
+# '[MdK]'
+# ]
+
+# def find_all_words_in_pdf(pdf_path, words_list):
+#     results = {word: [] for word in words_list}
+#     with pdfplumber.open(pdf_path) as pdf:
+#         for page_num, page in enumerate(pdf.pages):
+#             text = page.extract_text()
+#             if text:
+#                 for line in text.split('\n'):
+#                     for word in words_list:
+#                         if word in line:
+#                             results[word].append((page_num + 1, line.strip()))
+#     return results
+
+# print('_______Список слов, которые требуются для ввода в программу_______')
+
+# # Выполняем поиск всех слов одновременно
+# results2 = find_all_words_in_pdf(pdf_file, words_to_find2)
+# # Вывод результатов
+# for word, lines in results2.items():
+#     for page_number, line in lines:
+#         print(f"{line}")
+
+# print('_______Список выходных данных_______')
+# results3 = find_all_words_in_pdf(pdf_file, words_to_find3)
+# for word, lines in results3.items():
+#     for page_number, line in lines:
+#         print(f"{line}")
+
+# # Перевод данных в csv
+# def extract_key_and_values(line):
+#     # Находим часть до и включая ']'
+#     key_match = re.search(r'.*?\]', line)
+#     if not key_match:
+#         return None, None, None
+#     key = key_match.group(0)
+    
+#     # Ищем все числа (целые и дробные, с точкой)
+#     numbers = re.findall(r'-?\d+\.?\d*', line)
+#     # Оставляем только те, что идут после ключа
+#     numbers_after_key = []
+#     key_end_pos = key_match.end()
+#     for num_str in numbers:
+#         num_start = line.find(num_str, key_end_pos)
+#         if num_start != -1:
+#             numbers_after_key.append(num_str)
+    
+#     gear1 = numbers_after_key[0] if len(numbers_after_key) >= 1 else ''
+#     gear2 = numbers_after_key[1] if len(numbers_after_key) >= 2 else ''
+    
+#     return key, gear1, gear2
+
+# def save_to_csv(results2, results3, output_csv):
+#     with open(output_csv, 'w', newline='', encoding='utf-8-sig') as csvfile:
+#         writer = csv.writer(csvfile, delimiter=';')
+#         writer.writerow(['Строка и параметр', 'Колесо 1', 'Колесо 2'])
+#         # 2. Метка "Вводные данные"
+#         writer.writerow(['Данные из отчётов KISSoft', '---', '---'])
+#         writer.writerow(['Вводные данные', '---', '---'])
+        
+#         for word, lines in results2.items():
+#             for page_number, line in lines:
+#                 key, gear1, gear2 = extract_key_and_values(line)
+#                 if key is not None:
+#                     # Форматируем числа: заключаем в кавычки и добавляем знак =
+#                     gear1_formatted = f'="{gear1}"' if gear1 else ''
+#                     gear2_formatted = f'="{gear2}"' if gear2 else ''
+#                     writer.writerow([key, gear1_formatted, gear2_formatted])
+
+#         # 4. Метка "Выходные данные"
+#         writer.writerow(['Выходные данные', '---', '---'])
+
+#         for word, lines in results3.items():
+#             for page_number, line in lines:
+#                 key, gear1, gear2 = extract_key_and_values(line)
+#                 if key is not None:
+#                     # Форматируем числа: заключаем в кавычки и добавляем знак =
+#                     gear1_formatted = f'="{gear1}"' if gear1 else ''
+#                     gear2_formatted = f'="{gear2}"' if gear2 else ''
+#                     writer.writerow([key, gear1_formatted, gear2_formatted])
+
+# # Сохраняем в CSV
+
+# # 1. Получаем имя файла без расширения
+# pdf_filename_without_ext = os.path.splitext(os.path.basename(pdf_file))[0]
+
+# # 2. Получаем текущую дату и время в формате ГГГГММДД_ЧЧММСС
+# timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M')
+
+# # 3. Формируем итоговое имя CSV-файла
+# csv_filename = f'{pdf_filename_without_ext}_{timestamp}.csv'
+
+# # 4. Сохраняем в CSV с новым именем
+# save_to_csv(results2, results3, csv_filename)
