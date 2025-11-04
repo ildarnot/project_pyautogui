@@ -151,8 +151,8 @@ def save_to_csv(results, output_csv):
         writer = csv.writer(csvfile, delimiter=';')
         writer.writerow(['Строка и параметр', 'Колесо 1', 'Колесо 2'])
         # 2. Метка "Вводные данные"
-        writer.writerow(['---', 'Данные из отчётов KISSoft', '---'])
-        writer.writerow(['Вводные данные', '', ''])
+        # writer.writerow(['---', 'Данные из отчётов KISSoft', '---'])
+        # writer.writerow(['Вводные данные', '', ''])
         
         for word, lines in results.items():
             for page_number, line in lines:

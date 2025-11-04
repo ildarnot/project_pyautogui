@@ -2,6 +2,7 @@ import time
 import pyautogui
 import openpyxl
 from datetime import datetime
+import csv
 # import pyscreeze
 
 # Открываем книгу Excel
@@ -11,8 +12,30 @@ sheet = wb.active  # Или укажите название листа, если
 # Задаём текущее время
 current_datetime = datetime.now()
 custom_format_datetime = current_datetime.strftime("%d.%m.%Y_%H.%M")
+csv_file_path = '1_row_1262G3_2025.11.04_10.34.csv'
 
-# Находим значения по кодовым словам
+
+# Функция для поиска ячеек с ключевым значением и внос их в программу
+def find_value_by_keyword(csv_file_path, keyword):
+    with open(csv_file_path, mode='r', newline='', encoding='utf-8-sig') as file:
+        reader = csv.reader(file, delimiter=';', quotechar='"')
+        
+        for row_num, row in enumerate(reader):
+            # Пропускаем пустые строки
+            if not row or not any(cell.strip() for cell in row):
+                continue
+                
+            for i, cell in enumerate(row):
+                # Проверяем наличие ключевого слова (без учёта регистра и пробелов)
+                if keyword.lower() in cell.strip().lower():
+                    # Берём соседнюю ячейку справа
+                    try:
+                        return row[i + 1].strip()
+                    except IndexError:
+                        print(f"Нет следующей ячейки в строке {row_num}")
+                        pass
+    
+    return None
 
 
 
@@ -44,15 +67,21 @@ pyautogui.click(clear)
 # Нажатие на модуль и вписывание другого значения
 x, y = pyautogui.locateCenterOnScreen("module_button.png", confidence=0.7)
 pyautogui.click(x+150, y, 3, 0.1)
-# Читаем значение из ячейки B3
-value_from_excel = sheet['B1'].value
-pyautogui.typewrite(str(value_from_excel))
+# # Читаем значение из ячейки B3
+# value_from_excel = sheet['B1'].value
+
+# Используем функцию
+keyword = '[mn]'
+mn = find_value_by_keyword(csv_file_path, keyword)
+pyautogui.typewrite(str(mn))
 
 # Количество зубьев
 x, y = pyautogui.locateCenterOnScreen("teeth_number_button.png", confidence=0.7)
 pyautogui.click(x+150, y, 3, 0.1)
-value_from_excel = sheet['B2'].value
-pyautogui.typewrite(str(value_from_excel))
+# value_from_excel = sheet['B2'].value
+keyword = '[z]'
+z = find_value_by_keyword(csv_file_path, keyword)
+pyautogui.typewrite(str(z))
 
 # Выбор направления
 x, y = pyautogui.locateCenterOnScreen("direction_button.png", confidence=0.7)
@@ -64,20 +93,26 @@ pyautogui.click(x, y)
 # Выбор угла бэта
 x, y = pyautogui.locateCenterOnScreen("degree_betta_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B4'].value
-pyautogui.typewrite(str(value_from_excel))
+# value_from_excel = sheet['B4'].value
+keyword = '[β]'
+β = find_value_by_keyword(csv_file_path, keyword)
+pyautogui.typewrite(str(β))
 
 # Выбор смещения X
 x, y = pyautogui.locateCenterOnScreen("X_button.png", confidence=0.7)
 pyautogui.click(x+100, y-25, 3, 0.1)
-value_from_excel = sheet['B5'].value
-pyautogui.typewrite(str(value_from_excel))
+# value_from_excel = sheet['B5'].value
+keyword = 'Данные для финишной обработки [x]'
+x = find_value_by_keyword(csv_file_path, keyword)
+pyautogui.typewrite(str(x))
 
 # Поиск изображения и левой верхней точки "Ширина венца"
 x, y = pyautogui.locateCenterOnScreen("window2.png", confidence=0.7)
 pyautogui.click(x+150, y, 3, 0.1)
-value_from_excel = sheet['B6'].value
-pyautogui.typewrite(str(value_from_excel))
+# value_from_excel = sheet['B6'].value
+keyword = '[b]'
+b = find_value_by_keyword(csv_file_path, keyword)
+pyautogui.typewrite(str(b))
 
 # Выбор Профиля рейки
 x, y = pyautogui.locateCenterOnScreen("rack_prfl_button.png", confidence=0.7)
@@ -86,26 +121,34 @@ pyautogui.click(x, y)
 # Выбор угла альфа
 x, y = pyautogui.locateCenterOnScreen("degree_alfa_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B7'].value
-pyautogui.typewrite(str(value_from_excel))
+# value_from_excel = sheet['B7'].value
+keyword = '[αn]'
+αn = find_value_by_keyword(csv_file_path, keyword)
+pyautogui.typewrite(str(αn))
 
 # Выбор ha коэффициента высоты головки зуба
 x, y = pyautogui.locateCenterOnScreen("ha_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B8'].value
-pyautogui.typewrite(str(value_from_excel))
+# value_from_excel = sheet['B8'].value
+keyword = '[haP*]'
+ha= find_value_by_keyword(csv_file_path, keyword)
+pyautogui.typewrite(str(ha))
 
 # Выбор hf коэффициента высоты ножки зуба
 x, y = pyautogui.locateCenterOnScreen("hf_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B9'].value
-pyautogui.typewrite(str(value_from_excel))
+# value_from_excel = sheet['B9'].value
+keyword = '[hfP*]'
+hf= find_value_by_keyword(csv_file_path, keyword)
+pyautogui.typewrite(str(hf))
 
 # Выбор r коэффициента радиуса переходной кривой
 x, y = pyautogui.locateCenterOnScreen("r_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
-value_from_excel = sheet['B10'].value
-pyautogui.typewrite(str(value_from_excel))
+# value_from_excel = sheet['B10'].value
+keyword = '[ρfP*]'
+ρf= find_value_by_keyword(csv_file_path, keyword)
+pyautogui.typewrite(str(ρf))
 
 
 # Выбор галочки на протуберанце
