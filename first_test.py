@@ -13,7 +13,7 @@ import csv
 # Задаём текущее время
 current_datetime = datetime.now()
 custom_format_datetime = current_datetime.strftime("%d.%m.%Y_%H.%M")
-csv_file_path = '5 ряд_1262G3_2025.11.04_15.26.csv'
+csv_file_path = '2 ряд_1262G3_2025.11.04_15.25.csv'
 # Базовое имя файла без пути и расширения
 base_filename = os.path.splitext(os.path.basename(csv_file_path))[0]
 
@@ -84,6 +84,14 @@ time.sleep(0.5)
 # Очистка графиков
 clear=pyautogui.locateCenterOnScreen("clear_button.png", confidence=0.7)
 pyautogui.click(clear)
+
+
+# Количестов знаков после запятой
+x, y=pyautogui.locateCenterOnScreen("decimals_button.png", confidence=0.8)
+pyautogui.click(x, y, 1, 0.1)
+pyautogui.click(x+200, y, 3, 0.1)
+decimals=4
+pyautogui.typewrite(str(decimals))
 
 # Нажатие на модуль и вписывание другого значения
 x, y = pyautogui.locateCenterOnScreen("module_button.png", confidence=0.7)
@@ -174,10 +182,10 @@ pyautogui.typewrite(str(ρf))
 
 # Выбор галочки на протуберанце
 x, y = pyautogui.locateCenterOnScreen("protub_button.png", confidence=0.7)
-pyautogui.click(x+110, y)
+pyautogui.click(x+110, y, 1, 0.2)
 
 # Выбор hpr
-x, y = pyautogui.locateCenterOnScreen("hpr_button.png", confidence=0.8)
+x, y = pyautogui.locateCenterOnScreen("hpr_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
 # value_from_excel = sheet['B11'].value
 keyword = 'Коэффициент высоты протуберанца [hprP*]'
@@ -185,7 +193,7 @@ hpr = find_value_by_keyword(csv_file_path, keyword, occurrence=3)  # Трети�
 pyautogui.typewrite(str(hpr))
 
 # Выбор alfa_pr
-x, y = pyautogui.locateCenterOnScreen("degree_alfa_pr_button.png", confidence=0.8)
+x, y = pyautogui.locateCenterOnScreen("degree_alfa_pr_button.png", confidence=0.7)
 pyautogui.click(x+100, y, 3, 0.1)
 # value_from_excel = sheet['B12'].value
 keyword = '[αprP]'

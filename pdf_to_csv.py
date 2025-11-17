@@ -6,37 +6,6 @@ from datetime import datetime
 
 pdf_file = 'ДМ_1262_G3.pdf'
 
-# # Список слов для поиска
-# words_to_find = [
-# '[mn]', 
-# '[z]', 
-# 'Направление наклона', 
-# '[β]', 
-# 'Данные для финишной обработки [x]', 
-# '[b]', 
-# '[αn]', 
-# 'Высота головки зуба, исходный контур [haP*]',
-# 'Высота ножки зуба исходного контура [hfP*]',
-# 'Радиус ножки зуба исходного контура [ρfP*]',
-# '[pr0]',
-# 'Угол профиля протуберанца (°) [αprP]',
-# '[hprP*]',
-# '[d]',
-# '[αt]',
-# '[db]',
-# '[da]',
-# '[df]',
-# 'Диаметр окружности нижних активных точек профиля (мм)',
-# '[βb]',
-# '[k]',
-# '[Wk.e/i]',
-# '[ha]',
-# '[sc.e/i]',
-# '[san]',
-# '[DMeff]',
-# '[MdK]'
-# ]
-
 # Список слов, которые требуются для ввода в программу
 words_to_find2 = [
 '[mn]', 
@@ -72,6 +41,7 @@ words_to_find3 = [
 '[MdK]'
 ]
 
+# Функция поиска слов в pdf
 def find_all_words_in_pdf(pdf_path, words_list):
     results = {word: [] for word in words_list}
     with pdfplumber.open(pdf_path) as pdf:
@@ -83,14 +53,6 @@ def find_all_words_in_pdf(pdf_path, words_list):
                         if word in line:
                             results[word].append((page_num + 1, line.strip()))
     return results
-
-# # Выполняем поиск всех слов одновременно
-# results = find_all_words_in_pdf(pdf_file, words_to_find)
-
-# # Вывод результатов
-# for word, lines in results.items():
-#     for page_number, line in lines:
-#         print(f"'{word}' на стр {page_number}: {line}")
 
 print('_______Список слов, которые требуются для ввода в программу_______')
 
@@ -108,8 +70,6 @@ results3 = find_all_words_in_pdf(pdf_file, words_to_find3)
 for word, lines in results3.items():
     for page_number, line in lines:
         print(f"{line}")
-
-
 
 # Перевод данных в csv
 def extract_key_and_values(line):
