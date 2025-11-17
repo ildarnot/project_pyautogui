@@ -4,7 +4,7 @@ import csv
 import os
 from datetime import datetime
 
-pdf_file = 'ДМ_1262_G3.pdf'
+pdf_file = '1 ряд_1262G3.pdf'
 
 # Список слов, которые требуются для ввода в программу
 words_to_find2 = [
@@ -30,7 +30,7 @@ words_to_find3 = [
 '[db]',
 '[da]',
 '[df]',
-'Диаметр окружности нижних активных точек профиля (мм)',
+'[dNf]',
 '[βb]',
 '[k]',
 '[Wk.e/i]',
@@ -54,24 +54,9 @@ def find_all_words_in_pdf(pdf_path, words_list):
                             results[word].append((page_num + 1, line.strip()))
     return results
 
-print('_______Список слов, которые требуются для ввода в программу_______')
-
-# Выполняем поиск всех слов одновременно
-results2 = find_all_words_in_pdf(pdf_file, words_to_find2)
-
-# Вывод результатов
-for word, lines in results2.items():
-    for page_number, line in lines:
-        print(f"{line}")
-
-
-print('_______Список выходных данных_______')
-results3 = find_all_words_in_pdf(pdf_file, words_to_find3)
-for word, lines in results3.items():
-    for page_number, line in lines:
-        print(f"{line}")
 
 # Перевод данных в csv
+
 def extract_key_and_values(line):
     # Находим часть до и включая ']'
     key_match = re.search(r'.*?\]', line)
@@ -79,20 +64,142 @@ def extract_key_and_values(line):
         return None, None, None
     key = key_match.group(0)
     
-    # Ищем все числа (целые и дробные, с точкой)
-    numbers = re.findall(r'-?\d+\.?\d*', line)
-    # Оставляем только те, что идут после ключа
-    numbers_after_key = []
-    key_end_pos = key_match.end()
-    for num_str in numbers:
-        num_start = line.find(num_str, key_end_pos)
-        if num_start != -1:
-            numbers_after_key.append(num_str)
+    # Ищем числа ТОЛЬКО после ключа
+    key_end = key_match.end()
+    rest_of_line = line[key_end:].strip()
     
-    gear1 = numbers_after_key[0] if len(numbers_after_key) >= 1 else ''
-    gear2 = numbers_after_key[1] if len(numbers_after_key) >= 2 else ''
+    # Регулярное выражение для чисел (целые, дробные, с минусом)
+    numbers = re.findall(r'-?\d+\.?\d*', rest_of_line)
+    
+    gear1 = numbers[0] if len(numbers) >= 1 else ''
+    gear2 = numbers[1] if len(numbers) >= 2 else ''
     
     return key, gear1, gear2
+
+print('_______Список слов, которые требуются для ввода в программу_______')
+
+results2 = find_all_words_in_pdf(pdf_file, words_to_find2)
+
+# Специальная обработка для [hprP*]: накапливаем значения
+hpr_values = []
+
+# Накопление значений для "Данные для финишной обработки [x]"
+x_values = []  # <-- Новый список для сбора значений [x]
+
+for word, lines in results2.items():
+    if word == '[hprP*]':
+        # Собираем все числа из всех строк с [hprP*]
+        for page_number, line in lines:
+            key, g1, g2 = extract_key_and_values(line)
+            if g1:
+                hpr_values.append(g1)
+            if g2:
+                hpr_values.append(g2)
+    elif word == 'Данные для финишной обработки [x]':
+        # Собираем значения, не выводим сразу
+        for page_number, line in lines:
+            key, g1, g2 = extract_key_and_values(line)
+            if g1:
+                x_values.append(g1)
+            if g2:
+                x_values.append(g2)
+    else:
+        # Для остальных параметров — обычный вывод
+        for page_number, line in lines:
+            print(line)
+
+# Теперь выводим [hprP*] группами по 2 значения (или по 1, если осталось нечётное)
+print(f"Коэффициент высоты протуберанца [hprP*]", end="")
+for i, val in enumerate(hpr_values):
+    if i > 0 and i % 2 == 0:  # Каждые 2 значения — новая строка
+        print()  # Переход на новую строку
+        print(f"Коэффициент высоты протуберанца [hprP*]", end="")
+    print(f" {val}", end="")
+if hpr_values:  # Если были значения — завершаем строку
+    print()  # Перевод строки
+
+# Выводим "Данные для финишной обработки [x]" одной строкой
+if x_values:
+    print(f"Данные для финишной обработки [x] {' '.join(x_values)}")
+
+
+print('_______Список выходных данных_______')
+
+# Проводим поиск всех слов сразу
+results3 = find_all_words_in_pdf(pdf_file, words_to_find3)
+
+# Используем словарь для накопления уникальных значений
+accumulated_values = {
+    '[pr0]': [],
+    '[d]': [],
+    '[db]': [],
+    '[da]': [],
+    '[df]': [],  # Включили сюда также [df]
+    '[san]': [],
+    '[dNf]': [],
+}
+
+# Отдельно накапливаем значения для [ha] без префикса
+ha_values = []
+
+# Собираем все нужные значения в один проход
+for word, lines in results3.items():
+    if word in accumulated_values.keys():  # Только интересующие нас ключи
+        for _, line in lines:
+            key, gear1, gear2 = extract_key_and_values(line)
+            if gear1:
+                accumulated_values[word].append(gear1)
+            if gear2:
+                accumulated_values[word].append(gear2)
+    elif word == '[ha]':
+        for _, line in lines:
+            # Проверяем, есть ли префикс "Высота по хорде..."
+            if 'Высота по хорде от da.m (мм)' not in line:
+                # Это простое [ha] — накапливаем значения
+                key, gear1, gear2 = extract_key_and_values(line)
+                if gear1:
+                    ha_values.append(gear1)
+                if gear2:
+                    ha_values.append(gear2)
+            else:
+                # Это строка с префиксом — оставляем для прямого вывода
+                pass  # Будем выводить позже
+
+# Отображаем собранные значения в нужном формате
+for key, values in accumulated_values.items():
+    if values:
+        label_map = {
+            '[pr0]': 'Протуберанец (мм)',
+            '[d]': 'Диаметр делительной окружности (мм)',
+            '[db]': 'Диаметр основной окружности (мм)',
+            '[da]': 'Диаметр окружности вершин зубьев (мм)',
+            '[df]': 'Диаметр окружности впадин (мм)',
+            '[san]': 'Нормальная толщина зуба на окружности вершин зубьев (мм)',
+            '[dNf]': 'Диаметр окружности нижних активных точек профиля (мм)'
+        }
+        label = label_map.get(key, '')
+        print(f"{label} {key} {' '.join(values)}")
+
+# Выводим [ha] одной строкой (если есть значения)
+if ha_values:
+    print(f"[ha] {' '.join(ha_values)}")
+
+# Остальной вывод оставшихся элементов (включая [ha] с префиксом)
+remaining_keys = set(words_to_find3) - set(accumulated_values.keys())
+for word in remaining_keys:
+    if word in results3:
+        for _, line in results3[word]:
+            # Выводим только строки с префиксом для [ha]
+            if word == '[ha]' and 'Высота по хорде от da.m (мм)' in line:
+                print(line)
+            # Для остальных слов — выводим всё
+            elif word != '[ha]':
+                print(line)
+
+
+
+
+
 
 def save_to_csv(results2, results3, output_csv):
     with open(output_csv, 'w', newline='', encoding='utf-8-sig') as csvfile:
@@ -135,4 +242,4 @@ timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M')
 csv_filename = f'{pdf_filename_without_ext}_{timestamp}.csv'
 
 # 4. Сохраняем в CSV с новым именем
-save_to_csv(results2, results3, csv_filename)
+# save_to_csv(results2, results3, csv_filename)
