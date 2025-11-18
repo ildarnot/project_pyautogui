@@ -23,41 +23,7 @@ for line in lines:
     name, value = extract_data_gear_1(line)
     print(f"Название: {name}, Значение: {value}")
 
-# Выгрузка данных из вводного txt "3 ряд_1262G3_output_2025.11.17_15.43.txt" для второго колеса
-print('extract_data_gear_2')
-def extract_data_gear_2(line):
-    # Ищем всё от начала строки до ] включительно — это название
-    bracket_match = re.search(r'^.*?\]', line)
-    if not bracket_match:
-        return None, None  # Если скобки ] нет — не обрабатываем
-    
-    name = bracket_match.group(0)  # Само совпадение (всё до ] включительно)
-    
-    # Остаток строки после названия
-    rest = line[len(name):].strip()
-    
-    # Находим ВСЕ числовые фрагменты (числа с точкой, возможно разделённые /)
-    # Шаблон: число (\d+\.?\d*), затем возможно / и снова число — повторяется
-    number_groups = re.findall(r'\d+\.?\d*(?:\s*/\s*\d+\.?\d*)*', rest)
-    
-    if not number_groups:
-        return name, None  # Нет чисел — значение None
-    
-    # Берём ПОСЛЕДНЮЮ найденную группу чисел
-    value = number_groups[-1]
-    
-    return name, value.strip()
 
-# Примеры использования
-lines = []
-with open('3 ряд_1262G3_output_2025.11.17_15.43.txt', 'r', encoding='utf-8') as file:
-    for line in file:
-        if line.strip():  # пропускаем пустые строки
-            lines.append(line.strip())
-
-for line in lines:
-    name, value = extract_data_gear_2(line)
-    print(f"Название: {name}, Значение: {value}")
 
 # Попытка воспользоваться старым кодом для выписывания текста из итогового документа
 def extract_data_gear_output(line):
@@ -94,6 +60,51 @@ if failed_lines:
         print(failed_line)
 else:
     print("\n--- Все строки успешно распознаны ---")
+
+
+# Выгрузка данных из вводного txt "3 ряд_1262G3_output_2025.11.17_15.43.txt" для второго колеса
+print('extract_data_gear_2')
+def extract_data_gear_2(line):
+    # Ищем всё от начала строки до ] включительно — это название
+    bracket_match = re.search(r'^.*?\]', line)
+    if not bracket_match:
+        return None, None  # Если скобки ] нет — не обрабатываем
+    
+    name = bracket_match.group(0)  # Само совпадение (всё до ] включительно)
+    
+    # Остаток строки после названия
+    rest = line[len(name):].strip()
+    
+    # Находим ВСЕ числовые фрагменты (числа с точкой, возможно разделённые /)
+    # Шаблон: число (\d+\.?\d*), затем возможно / и снова число — повторяется
+    number_groups = re.findall(r'\d+\.?\d*(?:\s*/\s*\d+\.?\d*)*', rest)
+    
+    if not number_groups:
+        return name, None  # Нет чисел — значение None
+    
+    # Берём ПОСЛЕДНЮЮ найденную группу чисел
+    value = number_groups[-1]
+    
+    return name, value.strip()
+
+# Примеры использования
+lines = []
+with open('3 ряд_1262G3_output_2025.11.17_15.43.txt', 'r', encoding='utf-8') as file:
+    for line in file:
+        if line.strip():  # пропускаем пустые строки
+            lines.append(line.strip())
+
+for line in lines:
+    name, value = extract_data_gear_2(line)
+    print(f"Название: {name}, Значение: {value}")
+
+
+
+
+
+
+
+
 
 
 
