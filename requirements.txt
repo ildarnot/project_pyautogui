@@ -4,3 +4,6 @@ openpyxl
 pdfplumber
 pandas
 chardet
+pyperclip
+matplotlib
+seaborn

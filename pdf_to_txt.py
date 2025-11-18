@@ -86,15 +86,6 @@ def process_pdf_file(pdf_file):
         return key, gear1, gear2
 
 
-
-
-
-
-
-
-
-
-
     def save_to_csv(results2, results3, output_csv):
         with open(output_csv, 'w', newline='', encoding='utf-8-sig') as csvfile:
             writer = csv.writer(csvfile, delimiter=';')
