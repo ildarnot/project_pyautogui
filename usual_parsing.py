@@ -2,26 +2,38 @@ import re
 
 # Выгрузка данных из вводного txt "3 ряд_1262G3_output_2025.11.17_15.43.txt" для первого колеса
 def extract_data_gear_1(line):
-    pattern = r'^(.*?\])\s+([\d.]+(?:\s*/\s*[\d.]+)?)'
+    pattern = r'^(.*?\])\s+([-+]?[\d.]+(?:\s*/\s*[\d.]+)?)'
     match = re.match(pattern, line)
     if match:
         name = match.group(1)
         value = match.group(2)
         return name, value
     else:
+        failed_lines.append(line)  # Запоминаем строку, не подошедшую под шаблон
         return None, None
 
 # Примеры использования
-print('extract_data_gear_1')
-lines = []
+print("\n"+"="*60)
+print('Вводные данные extract_data_gear_1')
+print("="*60)
+input_1_lines = []
+failed_lines = []
 with open('3 ряд_1262G3_output_2025.11.17_15.43.txt', 'r', encoding='utf-8') as file:
     for line in file:
         if line.strip():  # пропускаем пустые строки
-            lines.append(line.strip())
+            input_1_lines.append(line.strip())
 
-for line in lines:
-    name, value = extract_data_gear_1(line)
-    print(f"Название: {name}, Значение: {value}")
+for line in input_1_lines:
+    input_1_name, input_1_value = extract_data_gear_1(line)
+    print(f"input 1 {input_1_name} |{input_1_value}")
+
+# Выводим строки, не совпавшие с шаблоном
+if failed_lines:
+    print("\n--- Строки, не совпавшие с регулярным выражением Вводные данные extract_data_gear_1 ---")
+    for failed_line in failed_lines:
+        print(failed_line)
+else:
+    print("\n--- Все строки успешно распознаны ---")
 
 
 
@@ -40,22 +52,24 @@ def extract_data_gear_output(line):
     else:
         failed_lines.append(line)  # Запоминаем строку, не подошедшую под шаблон
         return None, None
-
-print('extract_output_data_gear')
-lines = []
+    
+print("\n"+"="*60)
+print('Выходные данные extract_output_data_gear')
+print("="*60)
+output_1_lines = []
 failed_lines = []
 with open('3 ряд_1262G3_output_2025.11.17_15.43_2.txt', 'r', encoding='utf-8') as file:
     for line in file:
         if line.strip():  # пропускаем пустые строки
-            lines.append(line.strip())
+            output_1_lines.append(line.strip())
 
-for line in lines:
+for line in output_1_lines:
     name, value = extract_data_gear_output(line)
-    print(f"Название: {name}, Значение: {value}")
+    print(f"output 1 {name} |{value}")
 
 # Выводим строки, не совпавшие с шаблоном
 if failed_lines:
-    print("\n--- Строки, не совпавшие с регулярным выражением ---")
+    print("\n--- Строки, не совпавшие с регулярным выражением Выходные данные extract_output_data_gear ---")
     for failed_line in failed_lines:
         print(failed_line)
 else:
@@ -63,7 +77,9 @@ else:
 
 
 # Выгрузка данных из вводного txt "3 ряд_1262G3_output_2025.11.17_15.43.txt" для второго колеса
+print("\n"+"="*60)
 print('extract_data_gear_2')
+print("="*60)
 def extract_data_gear_2(line):
     # Ищем всё от начала строки до ] включительно — это название
     bracket_match = re.search(r'^.*?\]', line)
@@ -96,14 +112,97 @@ with open('3 ряд_1262G3_output_2025.11.17_15.43.txt', 'r', encoding='utf-8') 
 
 for line in lines:
     name, value = extract_data_gear_2(line)
-    print(f"Название: {name}, Значение: {value}")
+    print(f"input 2 {name} |{value}")
+
+
+# Получаем список кортежей сразу, это наша база, откуда мы тащим значения для маппинга
+input_1_results = list(map(extract_data_gear_1, input_1_lines))
+output_1_results = list(map(extract_data_gear_output, output_1_lines))
+
+# # Выводим все результаты
+# for name, value in input_1_results:
+#     print(f"input 1 {name} |{value}")
+    
+# Маппинг
+mapping = {
+    '[mn]': '[mn]',
+    '[z]': '[z]',
+    '[β]': '[β]',
+    '[b]': '[b]',
+    '[αn]': '[α]',
+    '[haP*]': '[ha*]',
+    '[hfP*]': '[hf*]',
+    '[ρfP*]': '[r*]',
+    '[αprP]': '[α_pr]',
+    '[hprP*]': '[h_pr]',
+    '[x]': '[x]',
+    '[pr0]': '[pr0]',
+    '[d]': '[d]',
+    '[db]': '[db]',
+    '[da]': '[da]',
+    '[df]': '[df]',
+    '[san]': '[san]',
+    '[βb]': '[βb]',
+    '[MdK]': '[MdK]',
+    '[DMeff]': '[DMeff]',
+    '[k]': '[k]',
+    '[αt]': '[αt]',
+    '[ha]': '[ha]',
+    '[Wk.e/i]': '[Wk]',
+    '[sc.e/i]': '[sc]'
+}
+
+
+def combine_data(input_data, output_data, mapping):
+    """
+    Объединяет данные из input и output по сопоставлению ключей в квадратных скобках.
+
+    :param input_data: список кортежей (name, value) из входного файла
+    :param output_data: список кортежей (name, value) из выходного файла
+    :param mapping: словарь {ключ_input: ключ_output}, например {'[mn]': '[mn]'}
+    :return: список строк формата "input 1 ... |output 1 ... |value1 | value2"
+    """
+    results = []
+    reverse_mapping = {v: k for k, v in mapping.items()}
+
+    for in_name, in_value in input_data:
+        # Пропускаем записи с None в имени
+        if in_name is None:
+            continue
+
+        in_key_match = re.search(r'\[[^\]]+\]', in_name)
+        if not in_key_match:
+            continue
+        in_key = in_key_match.group(0)
+
+        if in_key not in mapping:
+            continue
+        expected_out_key = mapping[in_key]
+
+        for out_name, out_value in output_data:
+            if out_name is None:  # Дополнительно проверяем output
+                continue
+            out_key_match = re.search(r'\[[^\]]+\]', out_name)
+            if out_key_match and out_key_match.group(0) == expected_out_key:
+                line = f"input 1 {in_name} |output 1 {out_name} |{in_value} | {out_value}"
+                results.append(line)
+                break
+
+    return results
 
 
 
+# Пример сбора данных (как в вашем коде)
 
+# Объединяем
+combined_lines = combine_data(input_1_results, output_1_results, mapping)
 
-
-
+# Выводим результат
+print("\n" + "="*80)
+print("СОПОСТАВЛЕННЫЕ ДАННЫЕ")
+print("="*80)
+for line in combined_lines:
+    print(line)
 
 
 
