@@ -15,7 +15,13 @@ current_datetime = datetime.now()
 # --- Заменяем жёсткий путь на относительные директории ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Директория скрипта
 
-INPUT_DIR = os.path.join(BASE_DIR, "autotest_ui_2025-11-19", "pdf_to_txt_2025.11.19_16.18")
+INPUT_DIR = os.path.join(BASE_DIR, "autotest_ui_2025-11-19", "1. pdf_to_txt_2025.11.20_13.49")
+
+# Создаём выходную папку с датой
+timestamp_dir = datetime.now().strftime('%Y.%m.%d_%H.%M')
+parent_dir = os.path.dirname(INPUT_DIR)
+output_dir = os.path.join(parent_dir, f"2. app_to_txt_{timestamp_dir}")
+print(f"Ожидаемая выходная директория: {output_dir}")
 # OUTPUT_DIR = os.path.join(BASE_DIR, f"autotest_{current_datetime.strftime('%d.%m.%Y_%H.%M')}")
 
 
@@ -88,6 +94,9 @@ if txt_files:
         print(f"  {f}")
 else:
     print("⚠️ В директории нет TXT-файлов!")
+
+# Создаём выходную папку с датой
+os.makedirs(output_dir, exist_ok=True)
 
 # Описываем паузы между кажддым действием в 0,1 сек
 pyautogui.PAUSE = 0.1
@@ -282,13 +291,23 @@ for txt_file_path in glob.glob(os.path.join(INPUT_DIR, "*.txt")):
     # Ожидание пока не отобразится всё на экране
     time.sleep(0.5)
 
-    # Нажатие на кнопку сохранить тестовая папка
-    x, y=pyautogui.locateCenterOnScreen("tests_folder.png", confidence=0.7)
+    # # Нажатие на кнопку сохранить тестовая папка
+    # x, y=pyautogui.locateCenterOnScreen("tests_folder.png", confidence=0.7)
+    # pyautogui.click(x, y, 2, 0.1)
+
+    # # Нажатие на кнопку сохранить результаты из таблицы
+    # x, y=pyautogui.locateCenterOnScreen("table_results_folder.png", confidence=0.7)
+    # pyautogui.click(x, y, 2, 0.1)
+
+    # Нажатие на кнопку с директорией
+    x, y = pyautogui.locateCenterOnScreen("output_direction_button.png", confidence=0.7)
+    pyautogui.click(x, y)
+    # Ввод директории
+    pyautogui.typewrite(str(output_dir))
+    # Нажатие на кнопку перехода к директории
+    x, y = pyautogui.locateCenterOnScreen("output_to_direction_button.png", confidence=0.7)
     pyautogui.click(x, y, 2, 0.1)
 
-    # Нажатие на кнопку сохранить результаты из таблицы
-    x, y=pyautogui.locateCenterOnScreen("table_results_folder.png", confidence=0.7)
-    pyautogui.click(x, y, 2, 0.1)
 
     # print(f"{base_filename}")
 

@@ -16,7 +16,7 @@ print(f"Найдены PDF-файлы: {pdf_files}")
 
 # Берём родительскую директорию от INPUT_PDF_DIR (убираем "Отчёты pdf")
 parent_dir = os.path.dirname(INPUT_PDF_DIR)
-OUTPUT_BASE_DIR = os.path.join(parent_dir, "pdf_to_txt")
+# OUTPUT_BASE_DIR = os.path.join(parent_dir, "pdf_to_txt")
 
 # Создаём выходную папку с датой
 timestamp_dir = datetime.now().strftime('%Y.%m.%d_%H.%M')
@@ -63,9 +63,9 @@ words_to_find3 = [
 '[dNf]',
 '[βb]',
 '[k]',
-'[Wk.e/i]',
+'[Wk]',
 '[ha]',
-'[sc.e/i]',
+'[sc]',
 '[san]',
 '[DMeff]',
 '[MdK]'

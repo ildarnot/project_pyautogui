@@ -1,4 +1,25 @@
 import re
+from datetime import datetime
+import os
+import glob
+
+direction_to_input1="autotest_ui_2025-11-19\\1. pdf_to_txt_2025.11.20_13.49\\4 ряд_1262G3_output_2025.11.20_13.49.txt"
+direction_to_output1="autotest_ui_2025-11-19\\2. app_to_txt_2025.11.20_15.24\\4 _1262G3_output_2025.11.20_13.49.txt"
+
+# Задаём текущее время
+current_datetime = datetime.now()
+# custom_format_datetime = current_datetime.strftime("%d.%m.%Y_%H.%M")
+# --- Заменяем жёсткий путь на относительные директории ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Директория скрипта
+
+INPUT_DIR = os.path.join(BASE_DIR, "autotest_ui_2025-11-19", "2. app_to_txt_2025.11.20_15.24")
+
+# Создаём выходную папку с датой
+timestamp_dir = datetime.now().strftime('%Y.%m.%d_%H.%M')
+parent_dir = os.path.dirname(INPUT_DIR)
+output_dir = os.path.join(parent_dir, f"3. autotest_result_{timestamp_dir}")
+# Создаём выходную папку с датой
+os.makedirs(output_dir, exist_ok=True)
 
 # Выгрузка данных из вводного txt "3 ряд_1262G3_output_2025.11.17_15.43.txt" для первого колеса
 def extract_data_gear_1(line):
@@ -18,7 +39,7 @@ print('Вводные данные extract_data_gear_1')
 print("="*60)
 input_1_lines = []
 failed_lines = []
-with open('3 ряд_1262G3_output_2025.11.17_15.43.txt', 'r', encoding='utf-8') as file:
+with open(direction_to_input1, 'r', encoding='utf-8') as file:
     for line in file:
         if line.strip():  # пропускаем пустые строки
             input_1_lines.append(line.strip())
@@ -58,7 +79,7 @@ print('Выходные данные extract_output_data_gear')
 print("="*60)
 output_1_lines = []
 failed_lines = []
-with open('3 ряд_1262G3_output_2025.11.17_15.43_2.txt', 'r', encoding='utf-8') as file:
+with open(direction_to_output1, 'r', encoding='utf-8') as file:
     for line in file:
         if line.strip():  # пропускаем пустые строки
             output_1_lines.append(line.strip())
@@ -119,9 +140,6 @@ else:
 input_1_results = list(map(extract_data_gear_1, input_1_lines))
 output_1_results = list(map(extract_data_gear_output, output_1_lines))
 
-# # Выводим все результаты
-# for name, value in input_1_results:
-#     print(f"input 1 {name} |{value}")
     
 # Маппинг
 mapping = {
@@ -148,8 +166,8 @@ mapping = {
     '[k]': '[k]',
     '[αt]': '[αt]',
     '[ha]': '[ha]',
-    '[Wk.e/i]': '[Wk]',
-    '[sc.e/i]': '[sc]'
+    '[Wk]': '[Wk]',
+    '[sc]': '[sc]'
 }
 
 
@@ -243,3 +261,20 @@ print("СОПОСТАВЛЕННЫЕ ДАННЫЕ")
 print("="*80)
 for line in combined_lines:
     print(line)
+
+
+# Объединяем
+combined_lines = combine_data(input_1_results, output_1_results, mapping)
+
+# Выводим результат и сохраняем в файл
+output_filename = os.path.join(output_dir, f"3. autotest_result_{timestamp_dir}.txt")
+
+with open(output_filename, 'w', encoding='utf-8') as f:
+    f.write("=" * 80 + "\n")
+    f.write("СОПОСТАВЛЕННЫЕ ДАННЫЕ\n")
+    f.write("=" * 80 + "\n")
+    
+    for line in combined_lines:
+        f.write(line + "\n")
+
+print(f"Результаты сохранены в файл: {output_filename}")
