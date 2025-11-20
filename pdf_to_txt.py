@@ -1,18 +1,40 @@
 import sys
 import pdfplumber
 import re
-import csv
 import os
 from datetime import datetime
 
+# Пути к директориям
+INPUT_PDF_DIR = r"C:\Users\NotfullinIF\Develop\pyautogui\project_pyautogui\autotest_ui_2025-11-19\Отчёты pdf"
+
+if not os.path.exists(INPUT_PDF_DIR):
+    print(f"Ошибка: путь не существует: {INPUT_PDF_DIR}")
+    exit(1)
+
+pdf_files = [f for f in os.listdir(INPUT_PDF_DIR) if f.lower().endswith('.pdf')]
+print(f"Найдены PDF-файлы: {pdf_files}")
+
+# Берём родительскую директорию от INPUT_PDF_DIR (убираем "Отчёты pdf")
+parent_dir = os.path.dirname(INPUT_PDF_DIR)
+OUTPUT_BASE_DIR = os.path.join(parent_dir, "pdf_to_txt")
+
+# Создаём выходную папку с датой
+timestamp_dir = datetime.now().strftime('%Y.%m.%d_%H.%M')
+output_dir = os.path.join(parent_dir, f"1. pdf_to_txt_{timestamp_dir}")
+os.makedirs(output_dir, exist_ok=True)
 # Список PDF-файлов для обработки
+# Получаем список всех PDF-файлов из входной директории
 pdf_files = [
-    '1 ряд_1262G3.pdf',
-    '2 ряд_1262G3.pdf',
-    '3 ряд_1262G3.pdf',
-    # '4 ряд_1262G3.pdf', #Есть 3 колеса в отчёте, не очень удобен для сравнения результатов, скорее всего
-    '5 ряд_1262G3.pdf'
+    f for f in os.listdir(INPUT_PDF_DIR)
+    if f.lower().endswith('.pdf')
 ]
+# pdf_files = [
+#     '1 ряд_1262G3.pdf',
+#     '2 ряд_1262G3.pdf',
+#     '3 ряд_1262G3.pdf',
+#     # '4 ряд_1262G3.pdf', #Есть 3 колеса в отчёте, не очень удобен для сравнения результатов, скорее всего
+#     '5 ряд_1262G3.pdf'
+# ]
 
 # Список слов, которые требуются для ввода в программу
 words_to_find2 = [
@@ -49,7 +71,7 @@ words_to_find3 = [
 '[MdK]'
 ]
 
-def process_pdf_file(pdf_file):
+def process_pdf_file(pdf_file, output_dir):
     # Функция поиска слов в pdf
     def find_all_words_in_pdf(pdf_path, words_list):
         results = {word: [] for word in words_list}
@@ -63,8 +85,6 @@ def process_pdf_file(pdf_file):
                                 results[word].append((page_num + 1, line.strip()))
         return results
 
-
-    # Перевод данных в csv
 
     def extract_key_and_values(line):
         # Находим часть до и включая ']'
@@ -86,36 +106,6 @@ def process_pdf_file(pdf_file):
         return key, gear1, gear2
 
 
-    def save_to_csv(results2, results3, output_csv):
-        with open(output_csv, 'w', newline='', encoding='utf-8-sig') as csvfile:
-            writer = csv.writer(csvfile, delimiter=';')
-            writer.writerow(['Строка и параметр', 'Колесо 1', 'Колесо 2'])
-            # 2. Метка "Вводные данные"
-            writer.writerow(['Данные из отчётов KISSoft', '---', '---'])
-            writer.writerow(['Вводные данные', '---', '---'])
-            
-            for word, lines in results2.items():
-                for page_number, line in lines:
-                    key, gear1, gear2 = extract_key_and_values(line)
-                    if key is not None:
-                        # Форматируем числа: заключаем в кавычки и добавляем знак =
-                        gear1_formatted = f'="{gear1}"' if gear1 else ''
-                        gear2_formatted = f'="{gear2}"' if gear2 else ''
-                        writer.writerow([key, gear1_formatted, gear2_formatted])
-
-            # 4. Метка "Выходные данные"
-            writer.writerow(['Выходные данные', '---', '---'])
-
-            for word, lines in results3.items():
-                for page_number, line in lines:
-                    key, gear1, gear2 = extract_key_and_values(line)
-                    if key is not None:
-                        # Форматируем числа: заключаем в кавычки и добавляем знак =
-                        gear1_formatted = f'="{gear1}"' if gear1 else ''
-                        gear2_formatted = f'="{gear2}"' if gear2 else ''
-                        writer.writerow([key, gear1_formatted, gear2_formatted])
-
-
     # Получаем имя файла без расширения
     pdf_filename_without_ext = os.path.splitext(os.path.basename(pdf_file))[0]
 
@@ -126,7 +116,16 @@ def process_pdf_file(pdf_file):
     txt_filename = f'{pdf_filename_without_ext}_output_{timestamp}.txt'
 
     # Открытие текстового файла для записи
-    with open(txt_filename, 'w', encoding='utf-8') as txt_output:
+    # with open(txt_filename, 'w', encoding='utf-8') as txt_output:
+    pdf_path = os.path.join(INPUT_PDF_DIR, pdf_file)
+    pdf_filename_without_ext = os.path.splitext(os.path.basename(pdf_path))[0]
+
+    timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M')
+    txt_filename = f"{pdf_filename_without_ext}_output_{timestamp}.txt"
+    txt_filepath = os.path.join(output_dir, txt_filename)
+
+    with open(txt_filepath, 'w', encoding='utf-8') as txt_output:
+
         # Перенаправляем стандартный вывод в файл
         original_stdout = sys.stdout
         sys.stdout = txt_output
@@ -254,35 +253,24 @@ def process_pdf_file(pdf_file):
             # Восстанавливаем стандартный вывод обратно в терминал
             sys.stdout = original_stdout
 
-
-    # Сохраняем в CSV
-
     # 1. Получаем имя файла без расширения
     pdf_filename_without_ext = os.path.splitext(os.path.basename(pdf_file))[0]
 
     # 2. Получаем текущую дату и время в формате ГГГГММДД_ЧЧММСС
     timestamp = datetime.now().strftime('%Y.%m.%d_%H.%M')
 
-    # 3. Формируем итоговое имя CSV-файла
-    csv_filename = f'{pdf_filename_without_ext}_{timestamp}.csv'
-
-    # 4. Сохраняем в CSV с новым именем
-    # save_to_csv(results2, results3, csv_filename)
     return txt_filename
 
 # Основной цикл обработки
 all_txt_files = []
-# all_csv_files = []
 
 for pdf_file in pdf_files:
     print(f"Обработка файла: {pdf_file}")
-    txt_file = process_pdf_file(pdf_file)
-    # txt_file, csv_file = process_pdf_file(pdf_file)
+    # txt_file = process_pdf_file(pdf_file)
+    txt_file = process_pdf_file(pdf_file, output_dir)
     all_txt_files.append(txt_file)
-    # all_csv_files.append(csv_file)
+
 
 print("Обработка завершена. Созданы файлы:")
 for txt in all_txt_files:
     print(f"TXT: {txt}")
-# for csv in all_csv_files:
-#     print(f"CSV: {csv}")
